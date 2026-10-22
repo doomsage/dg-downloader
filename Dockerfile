@@ -87,7 +87,8 @@ def run_download(jid, url, mode, outdir):
         output = os.path.join(outdir,filename)
         args = ['ffmpeg','-v','error','-i',target]
         args += ['-vn','-codec:a','libmp3lame','-b:a','192k'] if mode=='audio' else ['-map','0:v:0','-map','0:a:0','-c','copy','-movflags','+faststart']
-        subprocess.run(args+['-y',output],capture_output=True,timeout=80,check=True)
+        job['progress'] = 100
+        subprocess.run(args+['-y',output],capture_output=True,timeout=300,check=True)
         os.remove(target)
         job.update(status='done',progress=100,title=data.get('title'),filename=filename)
     except Exception as exc:
