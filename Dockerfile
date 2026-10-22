@@ -47,11 +47,8 @@ def run_download(jid, url, mode, outdir):
         r.raise_for_status()
         data = r.json()
         formats = data.get('formats') or []
-        if mode == 'audio':
-            fmt = next((x for x in formats if x.get('type')=='audio'),None)
-        else:
-            videos = [x for x in formats if x.get('type')=='video']
-            fmt = next((x for x in videos if x.get('label')=='360p'),None) or next((x for x in videos if x.get('label')=='720p'),None)
+        videos = [x for x in formats if x.get('type')=='video']
+        fmt = next((x for x in videos if x.get('label')=='360p'),None) or next((x for x in videos if x.get('label')=='720p'),None)
         if not fmt:
             raise RuntimeError('Provider returned no supported format. Try later.')
         stream = fmt.get('url','')
