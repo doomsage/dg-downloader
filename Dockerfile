@@ -19,11 +19,16 @@ replacement='''    from urllib.parse import urlparse
     if hostname in ("youtube.com", "youtu.be") or hostname.endswith(".youtube.com"):
         opts["proxy"] = "socks5://127.0.0.1:1080"
         opts["source_address"] = "0.0.0.0"
+        opts["format"] = "140/bestaudio" if mode == "audio" else "18/b[height<=360]"
         opts["js_runtimes"] = {"deno": {"path": "/usr/local/bin/deno"}}
     if mode == "audio":
         opts["format"]'''
 assert needle in s
-open(p,'w').write(s.replace(needle,replacement,1))
+s=s.replace(needle,replacement,1)
+needle2='    try:\n        with yt_dlp.YoutubeDL(opts) as y:'
+replace2='    if hostname in ("youtube.com", "youtu.be") or hostname.endswith(".youtube.com"):\n        opts["format"] = "140/bestaudio" if mode == "audio" else "18/b[height<=360]"\n    try:\n        with yt_dlp.YoutubeDL(opts) as y:'
+assert needle2 in s
+open(p,'w').write(s.replace(needle2,replace2,1))
 PY
 COPY <<'SH' /app/start.sh
 #!/bin/sh
@@ -31,6 +36,7 @@ set -eu
 mkdir -p /tmp/warp
 cd /tmp/warp
 if timeout 30 wgcf register --accept-tos > /tmp/warp-register.log 2>&1 && wgcf generate > /tmp/warp-generate.log 2>&1; then
+    sed -i 's/AllowedIPs = .*/AllowedIPs = 0.0.0.0\/0/' wgcf-profile.conf
     printf '\n[Socks5]\nBindAddress = 127.0.0.1:1080\n' >> wgcf-profile.conf
     wireproxy -c wgcf-profile.conf > /tmp/warp-proxy.log 2>&1 &
     echo 'WARP proxy started (YouTube only)'
