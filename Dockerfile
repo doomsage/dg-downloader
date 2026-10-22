@@ -37,7 +37,7 @@ mkdir -p /tmp/warp
 cd /tmp/warp
 if timeout 30 wgcf register --accept-tos > /tmp/warp-register.log 2>&1 && wgcf generate > /tmp/warp-generate.log 2>&1; then
     sed -i 's/AllowedIPs = .*/AllowedIPs = 0.0.0.0\/0/' wgcf-profile.conf
-    printf '\n[Socks5]\nBindAddress = 127.0.0.1:1080\n' >> wgcf-profile.conf
+    printf '\n[Resolve]\nResolveStrategy = ipv4\n[Socks5]\nBindAddress = 127.0.0.1:1080\n' >> wgcf-profile.conf
     wireproxy -c wgcf-profile.conf > /tmp/warp-proxy.log 2>&1 &
     echo 'WARP proxy started (YouTube only)'
 else
